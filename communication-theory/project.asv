@@ -1,0 +1,362 @@
+% Project Work:
+% Experimenting an Elementary Single-Carrier M-QAM-based Digital Communication Chain
+
+%%Basic system parameters
+clear all;
+close all;
+clc;
+
+R = 10e6 ; % Symbol rate (symbols/s)
+T = 1/R ;  % Symbol period (s)
+r =  4;    % Oversampling factor (samples/pulse)
+
+Fs = r/T;  % Sampling frequency (samples/s) or (Hz)
+Ts = 1/Fs; % Sampling period (s)
+
+%% Transmitter parameters
+%%%  Generation of QAM symbols
+N_symbols = 10000; % Number of symbols to transmit
+M = 16;    % Modulation order (number of symbols)
+
+% Generation of random symbols
+% • First, create M-QAM constellation
+% • Then draw the specified number ( N_symbols ) of random symbols from the constellation
+% • Plot the transmitted symbols in complex plane, for visualization
+
+qam_axis = -sqrt(M)+1:2:sqrt(M)-1; % QAM constellation axis
+
+% Generation of the complex constellation alphabet using the bsxfun function
+qam_alphabet = bsxfun(@plus, qam_axis.', 1i*qam_axis);
+
+% Represent the alphabet into a row vector
+qam_alphabet = qam_alphabet(:).';
+
+% Draw a random vector of numbers between 1...M
+symbol_ind = randi(length(qam_alphabet), 1, N_symbols);
+
+% Map the random vector of numbers to the alphabet
+symbols = qam_alphabet(symbol_ind);
+
+% Plot the transmitted symbols in complex plane
+figure(1);
+plot(symbols, 'ro','MarkerEdgeColor','R');
+axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
+xlabel('Real part');
+ylabel('Imaginary part');
+title('Transmitted symbols in complex plane');
+grid on;
+
+%%  Transmitter pulse shaping filtering
+%%%  Generation of the pulse shaping filter
+% • First, create the pulse shaping filter
+% • Then plot the impulse response of the filter
+% • Finally, plot the frequency response of the filter
+
+% Create the pulse shaping filter
+N_symbols_per_pulse = 40; % Number of symbols per pulse
+rolloff = 0.20;           % Rolloff factor of the filter
+span = N_symbols_per_pulse/2; % Filter span (in symbols)
+
+% The transmit RRC filter
+txfilter = rcosdesign(rolloff, N_symbols_per_pulse, r,'sqrt');
+
+% Plot the pulse response of the filter
+figure(2);
+plot(-span*r*Ts:Ts:span*r*Ts, txfilter,'b');
+xlabel('Time (s)');
+ylabel('Amplitude');
+title('Transmit RRC filter (pulse response)');
+grid on;
+
+%%% Filter the transmitted symbol sequence. We have to first upsample the symbol sequence rate to match
+%%% with sampling rate of the filter/pulse
+% Zero vector initilized for up-sampled symbol sequence
+symbols_upsampled = zeros(size(1, N_symbols*r));
+
+% Upsample the symbol sequence
+symbols_upsampled = upsample(symbols, r); % or symbols_upsampled(1:r:r*N_symbols) = symbols;
+
+% Filter the upsampled symbol sequence
+symbols_tx = filter(txfilter, 1, symbols_upsampled); 
+symbols_tx = symbols_tx(span*r+1:end-span*r); % Remove the filter transient
+% or symbols_tx = symbols_tx(1+(length(txfilter)-1)/2:end);
+
+% Plot the spectrum of the generated signal
+NFFT = 16384; % Number of FFT points to use i.e. 2^14
+f = Fs/2*linspace(-1,1,NFFT); % Frequency vector
+S = fftshift(abs(fft(symbols_tx, NFFT))); % FFT of the signal in absoulte value
+%S_dB = 20*log10(abs(S)); % Power spectral density (dB)
+% or
+S_dB = fftshift(20*log10(abs(fft(symbols_tx, NFFT)))); % Power spectral density (dB)
+
+figure(3);
+subplot(2,1,1);
+plot(f/1e6, S ,'b'); 
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('Transmitted signal spectrum');
+grid on;
+
+subplot(2,1,2);
+plot(f/1e6, S_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('Transmitted signal spectrum');
+grid on;
+
+%%%% Tasks 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% • Plot the relevant responses and explain what you observe.
+
+% The pulse response represents the spectrum of an OFDM signal with a sinc function as its envelope. 
+% The spectrum of the transmitted signal is an OFDM signal with a sinc function as its envelope.
+
+%% Noisy Multipath Channel Model
+%  Next, we model the channel between the TX and RX. In all electrical
+%  and/or electromagnetic communication systems, there is always additive
+%  noise, hence that is one central ingredient in our channel modeling
+% part as shown in Fig. 1. Furthermore, in many systems, there is also
+% linear distortion, hence we take that also into account and it is modeled
+% by a linear filter b(t) shown also in Fig. 1. Concrete example of linear
+% distortion is multipath propagation in wireless communications. 
+% * First  we experiment the linear distortion/multi-path propagation by generating
+% three example impulse responses of a multipath channel:
+
+% Generate three example impulse responses of a multipath channel
+b1 = 1; % means no multipath at all
+b2 = [0.9-0.15j 0 -0.2-0.44j 0 0.1+0.36j]; % some multipath components already
+b3 = [0.8+0.2j 0 0 0 -0.3+0.68j 0 0 0 0 0.4-0.6j]/1.5; % more harsh multipaths
+
+% Decide which channel profile to use and apply the channel model to the signal:
+b = b1; % Choose the channel profile to use
+symbols_rx = filter(b, 1, symbols_tx); % Apply the channel model to the signal
+
+% Plot the spectrum of the signal after multipath channel effect is applied
+S_rx = fftshift(abs(fft(symbols_rx, NFFT))); % FFT of the signal in absoulte value
+S_rx_dB = fftshift(20*log10(abs(fft(symbols_rx, NFFT)))); % Power spectral density (dB)
+
+figure(4);
+subplot(2,2,1);
+plot(f/1e6, S_rx ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('Received signal spectrum');
+grid on;
+
+subplot(2,2,2);
+plot(f/1e6, S_rx_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('Received signal spectrum');
+grid on;
+
+subplot(2,2,3); % trnsmitter part
+plot(f/1e6, S ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('Transmitted signal spectrum');
+grid on;
+
+subplot(2,2,4); % trnsmitter part
+plot(f/1e6, S_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('Transmitted signal spectrum');
+grid on;
+
+% Next, we add white Gaussian noise to the signal. We first create a noise
+% sequence with unit variance (power) and then scale it properly such that
+% a given inband signal-to-noise ratio (SNR) is obtained, when the noise is
+% superimposed with the signal y(t).
+% * Set SNR in dB and generate a properly scaled noise sequence
+
+SNRdB = 35; % Experimented signal-to-noise ratio [dB]
+
+% Complex white Gaussian noise with unit variance (power)
+noise = 1/sqrt(2)*(randn(size(symbols_rx)) + 1i*randn(size(symbols_rx)));
+
+% Scale the noise such that the desired SNR is obtained
+S_rx_power = var(S_rx); % Received signal power
+noise_power = var(noise); % Noise power
+noise_scale_factor = sqrt(S_rx_power/noise_power./(10^(SNRdB./10))); % Noise scale factor
+
+% Add the noise to the signal
+symbols_rx_noise = symbols_rx + noise_scale_factor*noise;
+
+% Plot the spectrum of the signal after noise is added
+S_rx_noise = fftshift(abs(fft(symbols_rx_noise, NFFT))); % FFT of the signal in absoulte value
+S_rx_noise_dB = fftshift(20*log10(abs(fft(symbols_rx_noise, NFFT)))); % Power spectral density (dB)
+
+figure(5);
+subplot(2,2,1);
+plot(f/1e6, S_rx_noise ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('RX signal spectrum, b=b3, SNRdb=50');
+grid on;
+
+subplot(2,2,2);
+plot(f/1e6, S_rx_noise_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('RX signal spectrum, b=b3, SNRdb=50'); 
+grid on;
+
+subplot(2,2,3); % trnsmitter part
+plot(f/1e6, S ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('TX signal spectrum');
+grid on;
+
+subplot(2,2,4); % trnsmitter part
+plot(f/1e6, S_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('TX signal spectrum');
+grid on;
+
+%% Tasks 2
+% • Vary the SNRdB value e.g. few values between 0 . . . 50, and see how that impacts the RX signal
+% spectrum. Provide relevant spectral examples and explain what you observe.
+% • Explain also the effects of multipath, why does the RX signal spectrum have clear fading
+% notches inside the passband ? To address the issue, plot the amplitude response of the multipath channel on a separate figure. You can do it as
+
+figure(99)
+subplot(211)
+plot(f/1e6, fftshift(abs(fft(b, NFFT)))); grid on;
+title('Multipath b=b2 in absolute value')
+subplot(212)
+plot(f/1e6, fftshift(20*log10(abs(fft(b, NFFT))))); grid on;
+title('Multipath b=b2 in log scale')
+
+%% 4 Basic Receiver Processing (Filtering and Sampling)
+%%% Receiver filtering and sampling
+% • First, create the receive RRC filter
+
+% The receive RRC filter 
+rxfilter = txfilter; % Matched filter
+
+% Filter the received noisy signal
+symbols_rx_noise_filtered = filter(rxfilter, 1, symbols_rx_noise);
+symbols_rx_noise_filtered = symbols_rx_noise_filtered(1+(length(rxfilter)-1)/2:end); % Remove the filter transient
+
+% Plot the spectrum of the filtered signal
+S_rx_noise_filtered = fftshift(abs(fft(symbols_rx_noise_filtered, NFFT))); % FFT of the signal in absoulte value
+S_rx_noise_filtered_dB = fftshift(20*log10(abs(fft(symbols_rx_noise_filtered, NFFT)))); % Power spectral density (dB)
+
+figure(6);
+subplot(2,2,1);
+plot(f/1e6, S_rx_noise ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('Received signal spectrum, with multipath and noise');
+grid on;
+
+subplot(2,2,2);
+plot(f/1e6, S_rx_noise_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('Received signal spectrum, with multipath and noise');
+grid on;
+
+subplot(2,2,3);
+plot(f/1e6, S_rx_noise_filtered ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Relative amplitude');
+title('Filtered received signal spectrum');
+grid on;
+
+subplot(2,2,4);
+plot(f/1e6, S_rx_noise_filtered_dB ,'b');
+xlabel('Frequency (MHz)');
+ylabel('Power spectral density (dB)');
+title('Filtered received signal spectrum');
+grid on;
+
+%%% Receiver sampling
+
+% sample the filtered signal at the symbol rate
+symbols_rx_noise_filtered_sampled = symbols_rx_noise_filtered(1:r:end);
+
+% Plot the spectrum of the sampled signal
+figure(7);
+plot(symbols_rx_noise_filtered_sampled, 'b*'); 
+hold on; grid on;
+plot(qam_alphabet, 'ro','MarkerEdgeColor','r');
+hold off;
+axis equal;
+%axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
+xlabel('Real part');
+ylabel('Imaginary part');
+title('Sampled RX symbols in complex plane');
+legend('Received samples', 'Original symbols')
+
+%% Tasks 3
+% • First momentarily omit the multipath (i.e. use the channel b1) and set SNR to 35 dB. Plot the
+% RX signal constellation and explain what you see.
+% • Then repeat by changing the SNR to 10 dB and 20 dB and plot and comment again the RX signal
+% constellation. Would the RX still be able to reliably decode/detect the received signal ?
+% • Then repeat by setting SNR back to 35 dB but now turning on the multipath channel. Experiment with both multipath channels b2 and b3. Plot always the RX signal constellation and try
+% to explain what you see.
+% • Then lower the SNR down to 10 dB. Again plot the RX signal constellations with all (multipath)
+% channels b1, b2 and b3 and explain what you see.
+% • Next, change the modulation order to M = 4, and repeat the above steps shortly. Comment on
+% the differences.
+% • Finally, change the modulation order to M = 64, and repeat the above steps shortly. Comment
+% on the differences.
+
+%% 4.2 Modeling a phase noise in receiver
+% Next we incorporate a non-ideal frequency oscillator into the receiver chain. The short term instability of
+% the oscillators appears as phase noise and sampling jitter, and it is very critical for the performance of the
+% system. This is something that we have not discussed much during lectures and is thus complementary
+% offering a chance to learn something new as well. For your convenience, there is ready-made Matlab function called phasenoise.m available at the course Moodle site to shortly experiment this issue. Download
+% the m file, and put it into the folder where your actual source code is. This function models a free-running
+% oscillator with 3 dB noise bandwidth determined by parameter Beta . Now we experiment the phasenoise effect on the above single-carrier waveform (without any additional channel noise or multipath of
+% the channel, to be able to more easily visually interpret how phase noise is impacting the signal).
+%  Apply the phase noise effect to the ideal transmit waveform and experiment the constellations of received signal.
+
+Beta = 100; % Noise bandwidth in Hz
+symbols_tx_phase_noise = phasenoise(numel(symbols_tx), Fs, Beta); % Apply the phase noise effect to the signal
+
+% Omit AWGN noise and multipath and add phase noise:
+% The effect on the used waveform is modeled by multiplying the ideal
+% waveform samples with generated phase noise
+symbols_rx = symbols_tx.*symbols_tx_phase_noise;
+
+% filter the received signal
+symbols_rx_filtered = filter(rxfilter, 1, symbols_rx);
+symbols_rx_filtered = symbols_rx_filtered(1+(length(rxfilter)-1)/2:end); % Remove the filter transient
+
+% sample the filtered signal at the symbol rate
+symbols_rx_filtered_sampled = symbols_rx_filtered(1:r:end);
+
+% Plot the spectrum of the signal after phase noise is added ( constellation for 1024 symbols)
+figure(8);
+plot(symbols_rx_filtered_sampled(1:1024), 'b*');
+hold on; grid on;
+plot(qam_alphabet, 'ro','MarkerEdgeColor','r');
+hold off;
+axis equal
+%axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
+xlabel('Real part');
+ylabel('Imaginary part');
+title('Sampled received symbols in complex plane');
+legend('Received samples', 'Original symbols')
+
+%% Tasks 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

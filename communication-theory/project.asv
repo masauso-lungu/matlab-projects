@@ -51,7 +51,6 @@ grid on;
 % • First, create the pulse shaping filter
 % • Then plot the impulse response of the filter
 % • Finally, plot the frequency response of the filter
-
 % Create the pulse shaping filter
 N_symbols_per_pulse = 40; % Number of symbols per pulse
 rolloff = 0.20;           % Rolloff factor of the filter
@@ -169,7 +168,7 @@ grid on;
 % superimposed with the signal y(t).
 % * Set SNR in dB and generate a properly scaled noise sequence
 
-SNRdB = 35; % Experimented signal-to-noise ratio [dB]
+SNRdB = 50; % Experimented signal-to-noise ratio [dB]
 
 % Complex white Gaussian noise with unit variance (power)
 noise = 1/sqrt(2)*(randn(size(symbols_rx)) + 1i*randn(size(symbols_rx)));
@@ -288,7 +287,7 @@ axis equal;
 %axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
 xlabel('Real part');
 ylabel('Imaginary part');
-title('Sampled RX symbols in complex plane');
+title('Sampled RX symbols in complex plane, b=b2, SNRdB=50, M=16');
 legend('Received samples', 'Original symbols')
 
 %% Tasks 3
@@ -340,7 +339,7 @@ axis equal
 %axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
 xlabel('Real part');
 ylabel('Imaginary part');
-title('Sampled received symbols in complex plane');
+title('Sampled RX symbols in complex plane, beta=100');
 legend('Received samples', 'Original symbols')
 
 %% Tasks 4

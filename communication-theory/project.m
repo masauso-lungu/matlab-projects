@@ -16,7 +16,7 @@ Ts = 1/Fs; % Sampling period (s)
 %% Transmitter parameters
 %%%  Generation of QAM symbols
 N_symbols = 10000; % Number of symbols to transmit
-M = 64;    % Modulation order (number of symbols)
+M = 16;    % Modulation order (number of symbols)
 
 % Generation of random symbols
 % • First, create M-QAM constellation
@@ -51,7 +51,6 @@ grid on;
 % • First, create the pulse shaping filter
 % • Then plot the impulse response of the filter
 % • Finally, plot the frequency response of the filter
-
 % Create the pulse shaping filter
 N_symbols_per_pulse = 40; % Number of symbols per pulse
 rolloff = 0.20;           % Rolloff factor of the filter
@@ -127,7 +126,7 @@ b2 = [0.9-0.15j 0 -0.2-0.44j 0 0.1+0.36j]; % some multipath components already
 b3 = [0.8+0.2j 0 0 0 -0.3+0.68j 0 0 0 0 0.4-0.6j]/1.5; % more harsh multipaths
 
 % Decide which channel profile to use and apply the channel model to the signal:
-b = b1; % Choose the channel profile to use
+b = b3; % Choose the channel profile to use
 symbols_rx = filter(b, 1, symbols_tx); % Apply the channel model to the signal
 
 % Plot the spectrum of the signal after multipath channel effect is applied
@@ -169,7 +168,7 @@ grid on;
 % superimposed with the signal y(t).
 % * Set SNR in dB and generate a properly scaled noise sequence
 
-SNRdB = 20; % Experimented signal-to-noise ratio [dB]
+SNRdB = 50; % Experimented signal-to-noise ratio [dB]
 
 % Complex white Gaussian noise with unit variance (power)
 noise = 1/sqrt(2)*(randn(size(symbols_rx)) + 1i*randn(size(symbols_rx)));
@@ -288,7 +287,7 @@ axis equal;
 %axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
 xlabel('Real part');
 ylabel('Imaginary part');
-title('Sampled RX symbols in complex plane, b=b1, SNRdB=20, M=64');
+title('Sampled RX symbols in complex plane, b=b3, SNRdB=50, M=16');
 legend('Received samples', 'Original symbols')
 
 %% Tasks 3
@@ -340,7 +339,7 @@ axis equal
 %axis([-sqrt(M) sqrt(M) -sqrt(M) sqrt(M)]);
 xlabel('Real part');
 ylabel('Imaginary part');
-title('Sampled received symbols in complex plane');
+title('Sampled RX symbols in complex plane, beta=100');
 legend('Received samples', 'Original symbols')
 
 %% Tasks 4

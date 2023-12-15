@@ -1,0 +1,248 @@
+
+# COMM.SYS.300 COMMUNICATION THEORY
+:imagesdir: images
+:toc: macro
+:toclevels: 4
+:sectanchors: true
+:sectlinks: true 
+:sectnums: true
+:image-role: .text-center
+:align: center
+
+
+## Author's details
+Name: MASAUSO LUNGU
+
+Email: masauso.lungu@tuni.fi
+
+ID #: 151910942
+
+link:https://github.com/masauso-lungu/matlab-projects/[Link to Github]
+
+## Project Work:
+Experimenting an Elementary Single-Carrier M-QAM-based Digital Communication Chain
+
+### Task 1
+* Plot the relevant responses and explain what you observe.
++
+.16-QAM constellation
+image::fig1.png["16-QAM constellation"]
++
+.Trasmit RRC filter
+image::fig2.png["Trasmit RRC filter"]
++
+.TX signal amplitude spectrum
+image::fig3.png["TX signal amplitude spectrum"]
+
+.Obsersavation
+[source]
+----
+Figure 1. and Figure 2. show the 16-QAM constellation and the Transmit RRC filter respectively. The 16-QAM constellation shows the 16-QAM symbols in the complex plane. The Transmit RRC filter shows the impulse response of the Transmit RRC filter. The filter pulse has a pick value of ~=0.52. Figure 3. shows the amplitude spectrum of the TX signal. The spectrum shows that the TX signal has a bandwidth of ~=10 MHz. The spectrum also shows that, withing the bandwidth, the TX signal has a flat frequency response with a spectral density of ~=55 dB.
+----
+
+
+### Task 2 
+* Vary the SNRdB value e.g. few values between 0 . . . 50, and see how that impacts the RX signal
+spectrum. Provide relevant spectral examples and explain what you observe.
++
+.RX Spectrum, SNRdB=0
+image::fig5_snr0.png[RX Spectrum, SNRdB=0]
++
+.RX Spectrum, SNRdB=15
+image::fig5_snr15.png["RX Spectrum, SNRdB=15"]
++
+.RX Spectrum, SNRdB=50
+image::fig5_snr50.png[RX Spectrum, SNRdB=50]
+
+.Observation
+[source]
+----
+From Figure 4. through Figure 6. we can observe that as the SNRdB increases, the RX signal spectrum becomes more and more similar to the TX signal spectrum. With an SNRdB of 0, the RX signal spectrum is very noisy and has a very low relative amplitude, as a result, it would be very difficult to detect the RX signal. Similarly, with an SNRdB of 15, the RX signal spectrum is still very noisy and has a very low relative amplitude, as a result, it would still be very difficult to detect the RX signal. However, with an SNRdB of 50, the RX signal spectrum is not noisy and has a very high relative amplitude, as a result, it would be very easy to detect the RX signal.
+----
+
+* Explain also the effects of multipath, why does the RX signal spectrum have clear fading
+notches inside the passband ? To address the issue, plot the amplitude response of the multipath channel on a separate figure. 
++
+.Multipath b=b2
+image::fig99.png["Multipath b=b2"]
+
+.Observation
+[source]
+----
+The presence of clear fading notches inside the passband is due amplitude distorted signal components arriving at the receiver at different times caused by multipath. As a result spectral components of the RX signal are attenuated at certain frequencies. Figure 7. the plot of the amplitude response of the multipath channel with b=b2. The plot shows decreasing amplitude response in the passband. The decreasing amplitude response in the passband is the cause of the fading notches inside the passband.
+----
+
+
+* Vary also the multipath channel profile between the channels b1, b2, b3 and explain what you
+observe (in terms of the RX signal spectrum).
++
+.RX Spectrum, SNRdB=50, b=b1
+image::fig5_snr50-b1.png["RX Spectrum, SNRdB=50, b=b1"]
++
+.RX Spectrum, SNRdB=50, b=b2
+image::fig5_snr50.png["RX Spectrum, SNRdB=50, b=b2"]
++
+.RX Spectrum, SNRdB=50, b=b3
+image::fig5_snr50-b3.png["RX Spectrum, SNRdB=50, b=b3"]
+
+.Observation
+[source]
+----
+From Figure 8. through Figure 10. we can observe that the RX signal spectrum is less distorted in the case when there is no multipath (b=b1) compared to the case when there is multipath (b=b2 and b=b3). Multipath also increases the amount of noise affecting the RX signal. Overall, the multpath channels b3 has the worst effect on the RX signal spectrum, as a result, it would be very difficult to recover the required information from the RX signal.
+----
+
+### Task 3
+* First momentarily omit the multipath (i.e. use the channel b1) and set SNR to 35 dB. Plot the
+RX signal constellation and explain what you see.
++
+.RX constellation, SNRdB=35, b=b1
+image::fig7_snr35.png["RX constellation, SNRdB=35, b=b1"]
+
+.Observation
+[source]
+----
+From Figure 11. it can be seen that with SNRdB = 35, the received samples do not match the constellation points of the original transmitted symbols. The received symbols are scattered all over the constellation. This indicate that there is too much noise in the channel through which the signal is transmitted.
+----
+
+
+* Then repeat by changing the SNR to 10 dB and 20 dB and plot and comment again the RX signal
+constellation. Would the RX still be able to reliably decode/detect the received signal ?
++
+.RX constellation, SNRdB=10, b=b1
+image::fig7_snr10.png["RX constellation, SNRdB=10, b=b1"]
++
+.RX constellation, SNRdB=20, b=b1
+image::fig7_snr20.png["RX constellation, SNRdB=20, b=b1"]
+
+
+.Observation
+[source]
+----
+From Figure 12. and Figure 13. it can be seen that with SNRdB = 10 and 20, the received samples do not match the constellation points of the original transmitted symbols. However, in comparison to the case of SNRdB=35 (Figure 11.), the received samples are more scattered all over the constellation and spreading more outwards from the constellation center. The worst case is when SNRdB=10. This indicate that there is too much noise in the channel through which the signal is transmitted. As a result, the RX would not be able to reliably decode/detect the received signal.
+----
+
+* Then repeat by setting SNR back to 35 dB but now turning on the multipath channel. Experiment with both multipath channels b2 and b3. Plot always the RX signal constellation and try
+to explain what you see.
++
+.RX constellation, SNRdB=35, b=b2
+image::fig7_snr35-b2.png["RX constellation, SNRdB=35, b=b2"]
++
+.RX constellation, SNRdB=35, b=b3
+image::fig7_snr35-b3.png["RX constellation, SNRdB=35, b=b3"]
+
+.Observation
+[source]
+----
+Taking Figure 31 through Figure 33. as reference, it can be seen in Figure 14. and Figure 15. that the addition of multipath to a noisy channel (SNRdB=35) increases the total amount of noise affecting the RX signal. As a result, the RX signal constellation is more scattered all over the constellation and spreading more outwards from the constellation center. The worst case is when b=b3. This indicate that there is too much noise in the channel through which the signal is transmitted. As a result, the RX would not be able to reliably decode/detect the received signal. 
+----
+
+* Then lower the SNR down to 10 dB. Again plot the RX signal constellations with all (multipath)
+channels b1, b2 and b3 and explain what you see.
++
+.RX constellation, SNRdB=10, b=b1
+image::fig7_snr10.png["RX constellation, SNRdB=10, b=b1"]
++
+.RX constellation, SNRdB=10, b=b2
+image::fig7_snr10-b2.png["RX constellation, SNRdB=10, b=b2"]
++
+.RX constellation, SNRdB=10, b=b3
+image::fig7_snr10-b3.png["RX constellation, SNRdB=10, b=b3"]
+
+.Observation
+[source]
+----
+From Figure 16. through Figure 18., similar to the case of SNRdB=35 it can be seen that increasing the amount of noise in the channel (SNRdB=10) and adding multipath to the channel increases the total amount of noise affecting the RX signal. As a result, the RX signal constellation is more scattered all over the constellation and spreading more outwards from the constellation center. The worst case is when b=b3 and SNRdB=10 (Figure 18.). 
+----
+
+
+* Next, change the modulation order to M = 4, and repeat the above steps shortly. Comment on
+the differences.
++
+.RX constellation, SNRdB=10, b=b1, M=4
+image::fig7_snr10_m4.png["RX constellation, SNRdB=10, b=b1, M=4"]
++
+.RX constellation, SNRdB=20, b=b1, M=4
+image::fig7_snr20_m4.png["RX constellation, SNRdB=20, b=b1, M=4"]
++
+.RX constellation, SNRdB=35, b=b1, M=4
+image::fig7_snr35_m4.png["RX constellation, SNRdB=35, b=b1, M=4"]
++
+.RX constellation, SNRdB=35, b=b2, M=4
+image::fig7_snr35-b2-m4.png["RX constellation, SNRdB=35, b=b2, M=4"]
++
+.RX constellation, SNRdB=35, b=b3, M=4
+image::fig7_snr35-b3-m4.png["RX constellation, SNRdB=35, b=b3, M=4"]
+
+.Observation
+[source]
+----
+From Figure 19. through Figure 23. it can be seen that similar to the case of M=16, the constellation of the received samples for M=4 do not match the constellation points of the original transmitted symbols. The received samples are scattered all over the constellation and spread outwards from the constellation center. Additonally, agian similar to the case of M=16, the worst case is when b=b3 and SNRdB=10. This indicate that there is too much noise in the channel through which the signal is transmitted. As a result, the RX would not be able to reliably decode/detect the received signal.
+
+However, in comparison to the case of M=16, the constellation of the received samples for M=4 apprear to be less spread outwards from the constellation center and occupy a smaller area. This is because the constellation of the transmitted samples for M=4 has less constellation points than the constellation of the tramsmitted samples for M=16.
+----
+
+* Finally, change the modulation order to M = 64, and repeat the above steps shortly. Comment
+on the differences.
++
+.RX constellation, SNRdB=10, b=b1, M=64
+image::fig7_snr10-b1-m64.png["RX constellation, SNRdB=10, b=b1, M=64"]
++
+.RX constellation, SNRdB=20, b=b1, M=64
+image::fig7_snr20-b1-m64.png["RX constellation, SNRdB=20, b=b1, M=64"]
++
+.RX constellation, SNRdB=35, b=b1, M=64
+image::fig7_snr35-b1-m64.png["RX constellation, SNRdB=35, b=b1, M=64"]
++
+.RX constellation, SNRdB=35, b=b2, M=64
+image::fig7_snr35-b2-m64.png["RX constellation, SNRdB=35, b=b2, M=64"]
++
+.RX constellation, SNRdB=35, b=b3, M=64
+image::fig7_snr35-b3-m64.png["RX constellation, SNRdB=35, b=b3, M=64"]
+
+.Observation
+[source]
+----
+Figure 24. through Figure 28. show the RX signal constellation for M=64. Similar to the case of M=16 and M=4, the constellation of the received samples for M=64 do not match the constellation points of the original transmitted symbols. The received samples are scattered all over the constellation and spread outwards from the constellation center. Additonally, agian similar to the case of M=16 and M=4, the worst case is when b=b3 and SNRdB=10. This is because there is too much noise coming from both the channel and the multipath. As a result, the RX would not be able to reliably decode/detect the received signal.
+
+However, in comparison to the case of M=16 and M=4, the constellation of the received samples for M=64 apprear to be more spread outwards from the constellation center and occupy a larger area. This is because the constellation of the transmitted samples for M=64 has more constellation points than the constellation of the tramsmitted samples for M=16 and M=4.
+----
+
+
+### Task 4
+*  First set Beta = 100 and plot the RX signal constellation and explain what you see.
++
+.RX constellation, Beta=100, b=b1, M=16, SNRdB=50
+image::fig8_beta100-b1-snr50.png["RX constellation, Beta=100, b=b1, M=16, SNRdB=50"]
+
+.Observation    
+[source]
+----
+As it can be seen on Figure 29., the introduction of phase noise (Beta=100) to the channel caused the received samples to rotate around the origin. this will increase the BER of the system.
+----
+
+* Then repeat by changing the Beta = 5000 and plot and comment again the RX signal constellation. Would the RX still be able to reliably decode/detect the received signal?
++
+.RX constellation, Beta=5000, b=b1, M=16, SNRdB=50
+image::fig8_beta5000-b1-snr50.png["RX constellation, Beta=5000, b=b1, M=16, SNRdB=50"]
+
+.Observation
+[source]
+----
+As it can be seen on Figure 30., increassing the phase noise (Beta=5000) to the channel caused the received samples to rotate around the origin more than in the case of Beta=100, resulting in the creation of circular patterns on the constellation. This would make the RX not able to reliably decode/detect the received signal.
+----
+
+### [Extra] Observig the influence of multipath channel profiles on a channel with less AWGN (SNRdB = 50 dB).
+The following figures show the RX constellation for different multipath channel profiles (b1, b2, b3) with SNRdB = 50 dB. This was used as a refrerence to compare the RX constellation for different multipath channel profiles, assuming that there is not too much AWGN in the channel.
+
+.RX constellation, b=b1, M=16, SNRdB=50
+image::fig7_snr50-b1.png["RX constellation, b=b1, M=16, SNRdB=50"]
+
+.RX constellation, b=b2, M=16, SNRdB=50
+image::fig7_snr50-b2.png["RX constellation, b=b2, M=16, SNRdB=50"]
+
+.RX constellation, b=b3, M=16, SNRdB=50
+image::fig7_snr50-b3.png["RX constellation, b=b3, M=16, SNRdB=50"]
+
+
+
+
